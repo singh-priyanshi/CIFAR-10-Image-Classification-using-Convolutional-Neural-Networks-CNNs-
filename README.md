@@ -35,18 +35,16 @@ To run this project locally, follow these steps:
 
 ## Dataset
 
-The CIFAR-10 dataset consists of 60,000 32x32 color images in 10 classes, with 6,000 images per class. There are 50,000 training images and 10,000 test images. The dataset can be directly downloaded using the `torchvision` library:
+The CIFAR-10 dataset consists of 60,000 32x32 color images in 10 classes, with 6,000 images per class. There are 50,000 training images and 10,000 test images. The dataset can be directly downloaded using the `tf.keras.datasets` module:
 
 ```python
-import torchvision
-import torchvision.transforms as transforms
+import tensorflow as tf
 
-transform = transforms.Compose(
-    [transforms.ToTensor(), 
-     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+# Loading the dataset
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
-trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
+# Normalize the images to have values between 0 and 1
+x_train, x_test = x_train / 255.0, x_test / 255.0
 ```
 
 ## Model Architecture
@@ -60,17 +58,41 @@ The model used for this project is a Convolutional Neural Network (CNN). CNNs ar
 
 A sample architecture used in this project:
 
-- Conv2D -> ReLU -> Conv2D -> ReLU -> MaxPooling2D
-- Conv2D -> ReLU -> Conv2D -> ReLU -> MaxPooling2D
-- Flatten -> Fully Connected -> Dropout -> Fully Connected -> Output
+```python
+from tensorflow.keras import layers, models
+
+model = models.Sequential([
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.Flatten(),
+    layers.Dense(64, activation='relu'),
+    layers.Dropout(0.5),
+    layers.Dense(10, activation='softmax')
+])
+```
 
 ## Machine Learning Techniques
 
 ### 1. **Data Augmentation**
-   To improve the generalizability of the model, data augmentation techniques such as random cropping, horizontal flipping, and random rotation were used to artificially increase the diversity of the dataset.
+   To improve the generalizability of the model, data augmentation techniques were used. These include random rotations, horizontal flips, and random cropping to artificially increase the diversity of the dataset:
+
+   ```python
+   from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+   datagen = ImageDataGenerator(
+       rotation_range=15,
+       width_shift_range=0.1,
+       height_shift_range=0.1,
+       horizontal_flip=True
+   )
+   datagen.fit(x_train)
+   ```
 
 ### 2. **Normalization**
-   The images were normalized to have zero mean and unit variance, which helps in speeding up the convergence of the model during training.
+   The images were normalized to have values between 0 and 1, which helps in speeding up the convergence of the model during training.
 
 ### 3. **Regularization**
    Regularization techniques, such as **Dropout**, were used to prevent the model from overfitting. Dropout randomly disables certain neurons during training, which helps in making the model more robust.
@@ -83,18 +105,17 @@ A sample architecture used in this project:
 
 ## Training and Evaluation
 
-The model was trained for 50 epochs using the **Cross-Entropy Loss** function, which is commonly used for multi-class classification problems. The model was evaluated on the test dataset to compute its accuracy.
+The model was trained for 50 epochs using the **Sparse Categorical Cross-Entropy** loss function, which is commonly used for multi-class classification problems. The model was evaluated on the test dataset to compute its accuracy.
 
 ```python
-import torch.optim as optim
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
 
-criterion = torch.nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-# Training loop
-for epoch in range(50):
-    # Training code here
-    pass
+# Training the model
+model.fit(datagen.flow(x_train, y_train, batch_size=64),
+          epochs=50,
+          validation_data=(x_test, y_test))
 ```
 
 The evaluation metrics include **accuracy**, **precision**, **recall**, and **F1 score**.
@@ -120,3 +141,5 @@ python src/evaluate.py
 ## Contributing
 
 Contributions are welcome! Please create a pull request if you would like to contribute to this project.
+
+
