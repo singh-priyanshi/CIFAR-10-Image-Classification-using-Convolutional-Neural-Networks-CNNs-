@@ -46,6 +46,8 @@ import tensorflow as tf
 # Normalize the images to have values between 0 and 1
 x_train, x_test = x_train / 255.0, x_test / 255.0
 ```
+<img width="739" alt="image" src="https://github.com/user-attachments/assets/2ee6191c-0a2d-49e8-8bd5-4add6dcc4128">
+
 
 ## Model Architecture
 
@@ -123,6 +125,8 @@ The evaluation metrics include **accuracy**, **precision**, **recall**, and **F1
 ## Results
 
 The model achieved an accuracy of approximately **88%** on the CIFAR-10 test dataset. The use of data augmentation and regularization techniques helped improve the model's performance and prevented overfitting.
+<img width="734" alt="image" src="https://github.com/user-attachments/assets/ad894751-4804-449a-b65b-ebd859cbee6b">
+
 
 ## Usage
 
